@@ -1,0 +1,106 @@
+
+
+<!--
+<HTML><HEAD><meta http-equiv="refresh" content="1; url=/index.html"></HEAD>
+<TITLE>PS4 Exploit Settings</TITLE>
+<BODY>Settings saved. Reset the card if network settings were changed!</BODY>
+</HTML>
+-->
+
+<HTML>
+<HEAD><LINK REL="icon" TYPE="image/png" HREF="/atari_icon.png"/>
+<TITLE>Atari RTC and TOS Settings</TITLE>
+<script type="text/javascript" src="./function.js"></script>
+
+<link rel="stylesheet" type="text/css" href="./style.css">
+<link rel="icon" type="image/png" href="./atari_icon.png">
+
+</HEAD>
+
+<BODY>
+ 
+<FORM ID="form1">
+<P>Wifi Mode</P>
+<DIV STYLE="margin-left: 1em;">
+<INPUT TYPE="radio" ID="ap" NAME="wifimode" VALUE="ap" checked>
+
+<LABEL FOR="ap">Access Point</LABEL>
+
+<BR></BR>
+
+<DIV STYLE="margin-left: 2em;">Name: <INPUT ID="apname" TYPE="text" NAME="apname" VALUE="ttty" onkeyup="apnameverify()">
+
+<LABEL ID="apnamelabel"></LABEL>
+
+<BR></BR>
+Password: <INPUT TYPE="password" ID="apPasswordlabel" NAME="apkey" VALUE="zzzza" onkeyup="apkeyverify()">
+
+<div class="checkbox_wrapper">
+<input type="checkbox"  onclick="showPassword( 'apPasswordlabel' )">
+<label></label>
+
+<BR></BR>
+
+<LABEL ID="apkeylabel"></LABEL>
+
+<input type="checkbox" name="mycheckbox" id="mycheckbox">
+<label for="mycheckbox" class="mycheckbox">Label</label>
+
+<BR></BR>
+
+</DIV>
+<INPUT TYPE="radio" ID="sta" NAME="wifimode" VALUE="sta"  checked >
+    
+<LABEL FOR="sta">Station</LABEL>
+
+<BR></BR>
+
+<div><style="font-size:20px;">Dark Theme Switch<label class="switch"><input type="checkbox" id="switchDarkThemeCtrl" name="darkTheme" VALUE="TEST" checked onclick="getDarkTheme_2();"><span class="slider round"></span></label></div>
+
+</DIV><DIV STYLE="margin-left: 2em;">
+
+<input type="checkbox" name="passwordCheckbox" id="passwordCheckbox">
+<label for="passwordCheckbox" class="passwordCheckbox">Label</label>
+
+
+<DIV></FORM><BUTTON TYPE="submit" ID="submitbtn" FORM="form1" VALUE="Submit">Save</BUTTON>
+
+
+
+
+
+<BR></BR>
+
+</BODY>
+</HTML>
+
+
+<!--
+    
+    int n = WiFi.scanNetworks();
+
+    if ( n == 0 )
+    {
+      sPage += "No networks found.\n<BR></BR>";
+    }
+    else
+    {
+      for ( int i = 0; i < n; ++i )
+      {
+        sPage += "<INPUT TYPE =\"radio\" ID=\"station" + String(i) + "\" NAME=\"stname\" VALUE=\"" + WiFi.SSID(i) + "\" ";
+        if ( WiFi.SSID(i) == stName ) sPage += "checked";
+        sPage += ">\n<LABEL FOR=\"station" + String(i, DEC) + "\">" + WiFi.SSID(i);
+        if ( WiFi.encryptionType(i) == ENC_TYPE_NONE ) sPage += " (open)";
+        sPage += "</LABEL>\n<BR></BR>\n";
+
+      }
+
+      sPage += "<DIV STYLE=\"margin-left: 2em;\">\nPassword: <INPUT TYPE=\"password\" NAME=\"stkey\" VALUE=\"" + stKey + "\">\n<BR></BR>\n";
+      sPage += "Static IP: <INPUT TYPE=\"text\" ID=\"staddress\" NAME=\"staddress\" VALUE=\"" + stAddress + "\" onkeypress=\"return isNumber(event)\" onkeyup=\"staddressverify()\">\n<LABEL ID=\"staddresslabel\"></LABEL>\n<BR></BR>\n</DIV>\n";
+    }
+-->
+
+
+
+
+

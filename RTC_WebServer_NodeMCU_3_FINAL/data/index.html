@@ -1,0 +1,472 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="en">
+
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
+
+<title>Atari Select TOS - Set RTC</title>
+
+<link rel="stylesheet" type="text/css" href="./style.css">
+<link rel="icon" type="image/png" href="./atari_icon.png">
+
+<!--<script src="jquery.min.js"></script>-->
+</head>
+
+
+<body>
+
+<script type="text/javascript" src="./function.js"></script>
+
+<script type="text/javascript">
+
+function launchURL( url )
+{
+	location.href = url;
+}
+
+function ProgressCountdown( timeleft, bar, text )
+{
+	return new Promise( ( resolve, reject ) =>
+	{
+		var countdownTimer = setInterval(() =>
+		{
+			timeleft--;
+
+			document.getElementById( bar ).value = timeleft;
+			document.getElementById( text ).textContent = timeleft;
+
+			if ( timeleft <= 0 )
+			{
+				clearInterval( countdownTimer );
+				resolve( true );
+			}
+		}, 1000 );
+		
+	} );
+}
+
+function getAtariCurrentTOSVersion()
+{
+	
+	return ( document.getElementById( 'atariVersionTOS' ).innerText == 'HIGH TOS' ) ? 1 : 0;
+}
+
+function getSelTosValue()
+{
+		
+	return ( document.getElementById( 'TOSKAOS' ).checked == true ) ? '0' : '1';
+}
+
+function getTOSVersionCheckCtrl_1()
+{	
+	document.getElementById( 'TOSKAOS'  ).checked = true;
+	document.getElementById( 'TOS206'  ).checked = false;
+	
+	localStorage.checkVersionTOS = '0';
+
+}
+
+function getTOSVersionCheckCtrl_2()
+{
+	document.getElementById( 'TOSKAOS' ).checked = false;
+	document.getElementById( 'TOS206'  ).checked = true;
+	
+	localStorage.checkVersionTOS = '1';
+
+}
+
+function setTOSVersionCheckCtrl()
+{
+	if ( localStorage.checkVersionTOS != null )
+	{
+		document.getElementById( 'TOSKAOS' ).checked = ( localStorage.checkVersionTOS == '0' ) ? true : false;
+		document.getElementById( 'TOS206'  ).checked = ( localStorage.checkVersionTOS == '0' ) ? false : true;
+	}
+	else
+	{	
+		document.getElementById( 'TOSKAOS' ).checked = true;
+		document.getElementById( 'TOS206'  ).checked = false;
+		
+		localStorage.checkVersionTOS = '0';
+
+	}
+}
+
+function setTOSVersion()
+{
+	var TOSKAOSState	= document.getElementById( 'TOSKAOS' ).checked;
+	var TOS206State		= document.getElementById( 'TOS206' ).checked;
+	
+	if (  ( TOS206State == true ) && ( getAtariCurrentTOSVersion() == '1' ) )
+	{
+		alert( "You have select 2.06 Original TOS.\nHigh TOS is already selected - Nothing To Do..." );
+		
+		return;
+	}
+	else if (  ( TOSKAOSState == true ) && ( getAtariCurrentTOSVersion() == '0' ) )
+	{
+		alert( "You have select KAOS TOS.\nLow TOS is already selected - Nothing To Do..." );
+		
+		return;
+	}
+	
+	var str	 = 'You select : ';
+		str	+= ( TOSKAOSState == true ) ? 'KAOS 1.42 ( fork of 1.04 )' : '2.06 Original';
+		str	+= ' TOS\n';
+		str	+= ( localStorage.resetAtariValue == '1' ) ? '\nAtari will Resetting - ' : '\n';
+		str	+= 'Confirm this ?';
+	
+	if ( confirm( str ) )
+	{
+		var strURL	= "./selTOS?version=";
+		strURL	   += ( TOSKAOSState == true ) ? '0' : '1';
+		strURL	   += "&setReset=" + getResetAtariValue()
+		
+		if ( localStorage.resetAtariValue == '1' )
+		{
+			document.getElementById( "progressBar" ).style.display = "block";
+			
+			ProgressCountdown( 5, 'pageBeginCountdown', 'pageBeginCountdownText' ).then( value => launchURL( strURL ) );
+			
+		}
+		else
+			launchURL( strURL );
+
+	}
+	else
+	{
+	
+	}
+	
+}
+
+function setCheckKAOSTOS()
+{
+	if ( document.getElementById( 'TOSKAOS' ).checked )
+	{
+		document.getElementById( 'TOS206' ).checked = false;
+	}
+	else
+	{
+		document.getElementById( 'TOSKAOS' ).checked = true;
+	}
+
+}
+
+function setCheckTOS206()
+{
+	if ( document.getElementById( 'TOS206' ).checked )
+	{
+		document.getElementById( 'TOSKAOS' ).checked = false;
+	}
+	else
+	{
+		document.getElementById( 'TOS206' ).checked = true;
+	}
+
+}
+
+
+setInterval( function ()
+{
+	var xhttp = new XMLHttpRequest();
+	
+	xhttp.onreadystatechange = function()
+	{
+		if ( this.readyState == 4 && this.status == 200 )
+		{
+			document.getElementById( "atariVersionTOS" ).innerHTML = this.responseText;
+		}
+	};
+	
+	xhttp.open( "GET", "/getAtariTOSVersion", true );
+	xhttp.send();
+	
+}, 2000 );
+
+setInterval( function ()
+{
+	var xhttp = new XMLHttpRequest();
+	
+	xhttp.onreadystatechange = function()
+	{
+		if ( this.readyState == 4 && this.status == 200 )
+		{
+			document.getElementById( "atariRTC_Ctrl" ).innerHTML = this.responseText;
+		}
+	};
+	
+	xhttp.open( "GET", "/getAtariRTC", true );
+	xhttp.send();
+	
+}, 2000 );
+
+
+
+const getTwoDigits = ( value ) => value < 10 ? `0${value}` : value;
+
+function formatDate( date )
+{
+	const day	= getTwoDigits( date.getDate() );
+	const month	= getTwoDigits( date.getMonth() + 1 ); // add 1 since getMonth returns 0-11 for the months
+	const year	= date.getFullYear();
+
+	return `${year}-${month}-${day}`;
+}
+
+const formatTime = (date) =>
+{
+  const hours	= getTwoDigits( date.getHours() );
+  const mins	= getTwoDigits( date.getMinutes() );
+
+  return `${hours}:${mins}`;
+}
+
+function setCurrentDateTime()
+{	
+	
+	let today = new Date();
+	
+	document.getElementById( 'currentDate' ).value = formatDate( today );
+	document.getElementById( 'currentTime' ).value = formatTime( today );
+}
+
+function getRTCDateTime()
+{
+	var str = document.getElementById( "atariRTC_Ctrl" ).innerHTML;
+		
+	if ( str == '%ATARIRTC%' )
+	{
+		str = "12:00/1990-08-26";
+	}
+	
+	var tempDateTime = str.split( "/" );
+	
+	document.getElementById( "currentTime" ).value = tempDateTime[0];
+	document.getElementById( "currentDate" ).value = tempDateTime[1];
+	
+	///launchURL( "./getAtariRTC" );
+	
+}
+
+function getDateValue()
+{
+
+	return document.getElementById( 'currentDate' ).value;
+}	
+
+function getTimeValue()
+{
+
+	return document.getElementById( 'currentTime' ).value;
+}
+
+function setDateTime()
+{
+	var pickDate = getDateValue();
+	var pickTime = getTimeValue();
+	
+	var tempDate = pickDate.split( "-" );
+	var tempTime = pickDate.split( ":" );
+	
+	var day		= tempDate[2];
+	var month	= tempDate[1];
+	var year	= tempDate[0];
+	
+	var hour	= tempTime[0];
+	var minute	= tempTime[1];
+	
+	const date = new Date();
+	
+	if ( pickDate == "" )
+	{
+		day		= getTwoDigits( date.getDate() );
+		month	= getTwoDigits(date.getMonth() + 1 );
+		year	= date.getFullYear();
+		
+		hours	= getTwoDigits( date.getHours() );
+		minute	= getTwoDigits( date.getMinutes() );
+		
+	}
+	
+	var strDateTime = "/setDateTime?valueDate=" + getDateValue() + "&valueTime=" + getTimeValue() + "&setReset=" + getResetAtariValue();
+		
+	if ( localStorage.resetAtariValue == '1' )
+	{
+		document.getElementById( "progressBar" ).style.display = "block";
+		
+		ProgressCountdown( 5, 'pageBeginCountdown', 'pageBeginCountdownText' ).then( value => launchURL( strDateTime ) );
+		
+	}
+	else
+		launchURL( strDateTime );
+
+}
+
+function setEnableDateTimeControl()
+{
+	var str = document.getElementById( "atariRTC_Ctrl" ).value;
+	
+	
+	//var enableElement = ( str != "Not Defined" || str != "Not Defined" ) ? "disabled" : "false";
+	
+	if ( str == "Not Defined" || str == "%ATARIRTC%" )
+	{
+		document.getElementById( "currentDate" ).disabled = "disabled";
+		document.getElementById( "currentTime" ).disabled = "disabled";
+		document.getElementById( "setCurrentDateTime_ctrl" ).disabled = "disabled";
+		document.getElementById( "getRTCDateTime_ctrl" ).disabled = "disabled";
+		document.getElementById( "setDateTime" ).disabled = "disabled";
+
+		document.getElementById( "setCurrentDateTime_ctrl" ).classList.add('buttonDisabled');
+		document.getElementById( "getRTCDateTime_ctrl" ).classList.add('buttonDisabled');
+		document.getElementById( "setDateTime" ).classList.add('buttonDisabled');
+	}
+	/*
+	else if ( str == "00:00/2000-00-00" )
+	{
+		document.getElementById( "atariRTC_Ctrl" ).value = "RTC Not Set";
+	}
+	*/
+	
+}
+
+function getResetAtari()
+{
+	if ( localStorage.resetAtariValue != null )
+	{
+		localStorage.resetAtariValue = ( document.getElementById( 'resetAtariCtrl' ).checked == true ) ? '1' : '0';
+	}
+	else
+		localStorage.resetAtariValue = '1';
+
+}
+
+function setResetAtari()
+{	
+	if ( localStorage.resetAtariValue != null )
+	{
+		document.getElementById( 'resetAtariCtrl' ).checked = ( localStorage.resetAtariValue == '1' ) ? true : false;
+	}
+	else
+	{
+		localStorage.resetAtariValue = '1';
+		
+		document.getElementById( 'resetAtariCtrl' ).checked = true;
+	}	
+
+}
+
+function getResetAtariValue()
+{
+	
+	return localStorage.resetAtariValue;
+}
+
+function forceReset()
+{	
+	document.getElementById( "progressBar" ).style.display = "block";
+	
+	ProgressCountdown( 5, 'pageBeginCountdown', 'pageBeginCountdownText' ).then( value => launchURL( "./forceReset" ) );
+		
+}
+</script>
+
+<h1 style="font-size:20px;">Atari Select TOS - Set RTC</h1>
+<hr>
+
+<p>
+<span style="font-size: 20px;font-weight: bold;">Atari actual TOS Version : </span>
+<span style="color:DeepSkyBlue;font-size: 18px;font-weight: bold;"  id="atariVersionTOS">%ATARITOSVERSION%</span>
+</p>
+
+<script>
+	//getAtariCurrentTOSVersion();
+</script>
+
+<div>
+<h1 style="font-size:20px;">Atari TOS Select :</h1>
+<h1 style="font-size:16px;"> KAOS 1.42 TOS  
+<label class="switch">
+	<input type="checkbox" id="TOSKAOS" onclick="getTOSVersionCheckCtrl_1()">
+	<span class="slider round"></span>
+</label>
+</h1>
+
+<h1 style="font-size:16px;"> 2.06 Original TOS  
+<label class="switch">
+	<input type="checkbox" id="TOS206" onclick="getTOSVersionCheckCtrl_2()">
+	<span class="slider round"></span>
+</label>
+</h1>
+
+<script>
+	setTOSVersionCheckCtrl();
+</script>
+
+<button class="button button2" id="setTOS" onclick="setTOSVersion()" >Set TOS Version</button>
+
+<hr>
+</div>
+
+<div id='ctrlDateTime'>
+<label for="Date" style="font-size: 20px;font-weight: bold;">Set Date / time of Atari RTC</label><br>
+
+<p>
+<span style="font-size: 20px;font-weight: bold;">Atari RTC : </span>
+<span style="color:DeepSkyBlue;font-size: 18px;font-weight: bold;" id="atariRTC_Ctrl">%ATARIRTC%</span>
+</p>
+
+<input type="date" id="currentDate" min="1981-08-15" max="2036-08-15" value="1990-08-26">
+<input type="time" id="currentTime" value="12:00" >
+<button class="button button1" id="setCurrentDateTime_ctrl" value="Submit" onclick="setCurrentDateTime()">Set current Date/Time</button>
+<button class="button button1" id="getRTCDateTime_ctrl" value="Submit" onclick="getRTCDateTime()">Get RTC Date/Time</button>
+<br><br>
+<button class="button button2" id="setDateTime" onclick="setDateTime()">Set Atari RTC clock</button>
+</div>
+<hr></hr>
+
+<script>
+	setEnableDateTimeControl();
+</script>
+
+<div>
+<h1 style="font-size:20px;"> Reset Atari after
+<label class="switch">
+	<input type="checkbox" id="resetAtariCtrl" onclick="getResetAtari()">
+	<span class="slider round"></span>
+</label>
+
+<script>
+	setResetAtari();
+</script>
+
+<label style="padding-left: 20px;"> <button class="button button2" id="forceResetCtrl" onclick="forceReset()">Force reset</button></label>
+</h1>
+</div>
+
+<div class="row begin-countdown" style="display:none;" id="progressBar">
+<div class="col-md-12 text-center"> 
+	<p style="font-size:16px;">Reboot Atari in <span id="pageBeginCountdownText">5 </span> seconds</p>
+    <progress value="5" max="5" id="pageBeginCountdown"></progress>
+</div>
+</div>
+
+<hr></hr>
+
+<script>
+	setDarkTheme();
+</script>
+
+<div>
+<a href="/settings"><button class="button button1">Settings</button></a> 
+</div>
+
+</body>
+
+</html> 
+
